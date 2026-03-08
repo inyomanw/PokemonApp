@@ -1,5 +1,6 @@
 package com.inyomanw.pokemonapp.presentation.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,7 @@ import com.inyomanw.pokemonapp.domain.model.PokemonModel
 import com.inyomanw.pokemonapp.ui.component.CustomImageView
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel) {
+fun HomeScreen(viewModel: HomeViewModel, onItemClick: (Int) -> Unit) {
 
     val pokemonPagingItems = viewModel.pokemonPagingFlow.collectAsLazyPagingItems()
 
@@ -52,7 +53,7 @@ fun HomeScreen(viewModel: HomeViewModel) {
             ) { index ->
                 val pokemon = pokemonPagingItems[index]
                 if (pokemon != null) {
-                    PokemonListItem(pokemon = pokemon)
+                    PokemonListItem(pokemon = pokemon, onItemClick)
                 }
             }
 
@@ -109,11 +110,14 @@ fun HomeScreen(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun PokemonListItem(pokemon: PokemonModel) {
+fun PokemonListItem(pokemon: PokemonModel, onItemClick: (Int) -> Unit) {
     Column(
         modifier = Modifier
             .wrapContentHeight()
-            .padding(4.dp),
+            .padding(4.dp)
+            .clickable {
+                onItemClick.invoke(pokemon.url.getPokemonId())
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         CustomImageView(
@@ -142,4 +146,10 @@ fun ErrorState(message: String, onRetry: () -> Unit) {
             Text(text = "Try Again")
         }
     }
+}
+
+fun String?.getPokemonId(): Int {
+    return this?.let {
+        split("/").last { it.isNotBlank() }.toInt()
+    } ?: 0
 }

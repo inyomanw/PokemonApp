@@ -37,14 +37,15 @@ import com.inyomanw.pokemonapp.presentation.ui.home.HomeViewModel
 import com.inyomanw.pokemonapp.presentation.ui.profile.ProfileScreen
 
 @Composable
-fun MainScreen(homeViewModel: HomeViewModel) {
+fun MainScreen(homeViewModel: HomeViewModel, onItemClick: (Int) -> Unit) {
     val navController = rememberNavController()
     val navigationItems = listOf(
         NavigationItem.Home,
         NavigationItem.Profile,
     )
 
-    Scaffold { innerPadding ->
+    Scaffold(
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -56,7 +57,7 @@ fun MainScreen(homeViewModel: HomeViewModel) {
                 modifier = Modifier.fillMaxSize()
             ) {
                 composable(NavigationItem.Home.route) {
-                    HomeScreen(homeViewModel)
+                    HomeScreen(homeViewModel, onItemClick)
                 }
                 composable(NavigationItem.Profile.route) {
                     ProfileScreen()

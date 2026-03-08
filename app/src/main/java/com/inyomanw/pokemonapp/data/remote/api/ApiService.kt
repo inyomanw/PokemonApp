@@ -1,7 +1,9 @@
 package com.inyomanw.pokemonapp.data.remote.api
 
+import com.inyomanw.pokemonapp.data.remote.model.PokemonDetailResponse
 import com.inyomanw.pokemonapp.data.remote.model.PokemonResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -12,4 +14,6 @@ interface ApiService {
         @Query("limit") limit: Int
     ): PokemonResponse
 
+    @GET("pokemon/{pokemonId}")
+    suspend fun getDetailPokemon(@Path("pokemonId") id: Int): PokemonDetailResponse
 }
