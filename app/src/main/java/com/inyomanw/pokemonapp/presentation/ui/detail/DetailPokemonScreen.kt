@@ -1,5 +1,6 @@
 package com.inyomanw.pokemonapp.presentation.ui.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.inyomanw.pokemonapp.ui.component.CustomImageView
 
@@ -38,7 +40,7 @@ fun DetailPokemonScreen(
     } else {
         detail?.let {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp).background(color = Color.White)
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
                 CustomImageView(
