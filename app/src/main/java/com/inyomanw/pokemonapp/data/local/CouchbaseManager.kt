@@ -22,4 +22,12 @@ class CouchbaseManager @Inject constructor(
     val userCollection: Collection by lazy {
         database.createCollection("users")
     }
+
+    val pokemonListCollection: Collection by lazy {
+        database.createCollection("pokemon_list")
+    }
+
+    val pokemonDetailCollection: Collection by lazy {
+        database.createCollection("pokemon_detail")
+    }
 }

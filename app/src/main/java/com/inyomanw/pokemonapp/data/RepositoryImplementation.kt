@@ -4,13 +4,16 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.inyomanw.pokemonapp.data.local.SessionManager
-import com.inyomanw.pokemonapp.data.local.UserLocalDataSource
+import com.inyomanw.pokemonapp.data.local.model.AbilityDocument
+import com.inyomanw.pokemonapp.data.local.model.PokemonDetailDocument
 import com.inyomanw.pokemonapp.data.local.model.UserDocument
 import com.inyomanw.pokemonapp.data.mapper.toPokemonDetailModel
 import com.inyomanw.pokemonapp.data.paging.AppPagingSource
 import com.inyomanw.pokemonapp.data.paging.AppPagingSource.Companion.LIMIT
-import com.inyomanw.pokemonapp.data.remote.api.ApiService
+import com.inyomanw.pokemonapp.data.source.LocalDataSource
+import com.inyomanw.pokemonapp.data.source.RemoteDataSource
 import com.inyomanw.pokemonapp.domain.Repository
+import com.inyomanw.pokemonapp.domain.model.AbilityModel
 import com.inyomanw.pokemonapp.domain.model.PokemonDetailModel
 import com.inyomanw.pokemonapp.domain.model.PokemonModel
 import com.inyomanw.pokemonapp.domain.model.UserModel
@@ -21,8 +24,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 class RepositoryImplementation @Inject constructor(
-    private val apiService: ApiService,
-    private val userLocalDataSource: UserLocalDataSource,
+    private val remoteDataSource: RemoteDataSource,
+    private val localDataSource: LocalDataSource,
     private val sessionManager: SessionManager
 ) : Repository {
 
@@ -33,17 +36,45 @@ class RepositoryImplementation @Inject constructor(
                 enablePlaceholders = true
             ),
             pagingSourceFactory = {
-                AppPagingSource(apiService)
+                AppPagingSource(remoteDataSource, localDataSource)
             }
         ).flow
     }
 
     override suspend fun getPokemonDetail(id: Int): PokemonDetailModel {
-        return apiService.getDetailPokemon(id).toPokemonDetailModel()
+        val cached = localDataSource.getPokemonDetail(id)
+        if (cached != null) {
+            return PokemonDetailModel(
+                name = cached.name,
+                abilityList = cached.abilities.map {
+                    AbilityModel(abilityName = it.abilityName, isHidden = it.isHidden)
+                }
+            )
+        }
+
+        try {
+            val response = remoteDataSource.getPokemonDetail(id)
+            val model = response.toPokemonDetailModel()
+            localDataSource.savePokemonDetail(
+                PokemonDetailDocument(
+                    id = id,
+                    name = model.name ?: "",
+                    abilities = model.abilityList?.map {
+                        AbilityDocument(
+                            abilityName = it.abilityName ?: "",
+                            isHidden = it.isHidden ?: false
+                        )
+                    } ?: emptyList()
+                )
+            )
+            return model
+        } catch (e: Exception) {
+            throw Exception("Periksa koneksi internet Anda.", e)
+        }
     }
 
     override fun registerUser(user: UserModel, password: String): Flow<Result<Unit>> = flow {
-        if (userLocalDataSource.isUsernameExists(user.username)) {
+        if (localDataSource.isUsernameExists(user.username)) {
             emit(Result.failure(Exception("Username '${user.username}' sudah terdaftar")))
             return@flow
         }
@@ -54,12 +85,12 @@ class RepositoryImplementation @Inject constructor(
             fullName = user.fullName,
             address = user.address
         )
-        userLocalDataSource.saveUser(document)
+        localDataSource.saveUser(document)
         emit(Result.success(Unit))
     }
 
     override fun loginUser(username: String, password: String): Flow<Result<UserModel>> = flow {
-        val userDoc = userLocalDataSource.findByUsername(username)
+        val userDoc = localDataSource.findByUsername(username)
         if (userDoc == null) {
             emit(Result.failure(Exception("Username tidak ditemukan")))
             return@flow
@@ -79,7 +110,7 @@ class RepositoryImplementation @Inject constructor(
 
     override fun getLoggedInUser(): UserModel? {
         val username = sessionManager.getLoggedInUsername() ?: return null
-        val doc = userLocalDataSource.findByUsername(username) ?: return null
+        val doc = localDataSource.findByUsername(username) ?: return null
         return UserModel(
             username = doc.username,
             fullName = doc.fullName,

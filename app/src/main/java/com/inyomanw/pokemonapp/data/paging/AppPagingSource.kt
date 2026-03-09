@@ -2,12 +2,14 @@ package com.inyomanw.pokemonapp.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.inyomanw.pokemonapp.data.remote.api.ApiService
+import com.inyomanw.pokemonapp.data.local.model.PokemonDocument
+import com.inyomanw.pokemonapp.data.source.LocalDataSource
+import com.inyomanw.pokemonapp.data.source.RemoteDataSource
 import com.inyomanw.pokemonapp.domain.model.PokemonModel
-import javax.inject.Inject
 
-class AppPagingSource @Inject constructor(
-    private val apiService: ApiService
+class AppPagingSource(
+    private val remoteDataSource: RemoteDataSource,
+    private val localDataSource: LocalDataSource
 ) : PagingSource<Int, PokemonModel>() {
 
     companion object {
@@ -24,12 +26,24 @@ class AppPagingSource @Inject constructor(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, PokemonModel> {
         val page = params.key ?: STARTING_PAGE_INDEX
-        return try {
-            val response = apiService.getPokemon(offset = page, limit = LIMIT)
-            val pokemons = response.result
 
-            LoadResult.Page(
+        val cached = localDataSource.getPokemonListByOffset(page)
+        if (cached.isNotEmpty()) {
+            val pokemons = cached.map { PokemonModel(name = it.name, url = it.url) }
+            return LoadResult.Page(
                 data = pokemons,
+                prevKey = if (page == 0) null else page - LIMIT,
+                nextKey = if (cached.size < LIMIT) null else page + LIMIT
+            )
+        }
+
+        return try {
+            val response = remoteDataSource.getPokemonList(offset = page, limit = LIMIT)
+            localDataSource.savePokemonList(
+                response.result.map { PokemonDocument(name = it.name ?: "", url = it.url ?: "", offset = page) }
+            )
+            LoadResult.Page(
+                data = response.result,
                 prevKey = if (page == 0) null else page - LIMIT,
                 nextKey = if (response.next == null) null else page + LIMIT
             )

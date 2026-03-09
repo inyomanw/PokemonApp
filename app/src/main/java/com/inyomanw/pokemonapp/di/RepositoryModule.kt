@@ -2,8 +2,8 @@ package com.inyomanw.pokemonapp.di
 
 import com.inyomanw.pokemonapp.data.RepositoryImplementation
 import com.inyomanw.pokemonapp.data.local.SessionManager
-import com.inyomanw.pokemonapp.data.local.UserLocalDataSource
-import com.inyomanw.pokemonapp.data.remote.api.ApiService
+import com.inyomanw.pokemonapp.data.source.LocalDataSource
+import com.inyomanw.pokemonapp.data.source.RemoteDataSource
 import com.inyomanw.pokemonapp.domain.Repository
 import dagger.Module
 import dagger.Provides
@@ -17,8 +17,8 @@ object RepositoryModule {
     @Singleton
     @Provides
     fun provideRepository(
-        apiService: ApiService,
-        userLocalDataSource: UserLocalDataSource,
+        remoteDataSource: RemoteDataSource,
+        localDataSource: LocalDataSource,
         sessionManager: SessionManager
-    ): Repository = RepositoryImplementation(apiService, userLocalDataSource, sessionManager)
+    ): Repository = RepositoryImplementation(remoteDataSource, localDataSource, sessionManager)
 }

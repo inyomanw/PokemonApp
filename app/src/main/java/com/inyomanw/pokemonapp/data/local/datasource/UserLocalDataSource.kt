@@ -1,12 +1,12 @@
-package com.inyomanw.pokemonapp.data.local
+package com.inyomanw.pokemonapp.data.local.datasource
 
 import com.couchbase.lite.MutableDocument
 import com.couchbase.lite.QueryBuilder
 import com.couchbase.lite.SelectResult
 import com.couchbase.lite.DataSource
 import com.couchbase.lite.Expression
+import com.inyomanw.pokemonapp.data.local.CouchbaseManager
 import com.inyomanw.pokemonapp.data.local.model.UserDocument
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
