@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
 
+    implementation(libs.couchbase.lite)
+
     debugImplementation(libs.chucker)
 
     androidTestImplementation(libs.androidx.ui.test.junit4)

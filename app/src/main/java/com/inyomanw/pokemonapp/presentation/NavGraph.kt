@@ -7,16 +7,46 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.inyomanw.pokemonapp.presentation.ui.MainScreen
+import com.inyomanw.pokemonapp.presentation.ui.auth.AuthViewModel
+import com.inyomanw.pokemonapp.presentation.ui.auth.LoginScreen
+import com.inyomanw.pokemonapp.presentation.ui.auth.RegisterScreen
 import com.inyomanw.pokemonapp.presentation.ui.detail.DetailPokemonScreen
 import com.inyomanw.pokemonapp.presentation.ui.detail.DetailPokemonViewModel
 import com.inyomanw.pokemonapp.presentation.ui.home.HomeViewModel
 
 @Composable
-fun NavGraph(homeViewModel: HomeViewModel, detailPokemonViewModel: DetailPokemonViewModel) {
-
+fun NavGraph(
+    homeViewModel: HomeViewModel,
+    detailPokemonViewModel: DetailPokemonViewModel,
+    authViewModel: AuthViewModel
+) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(navController = navController, startDestination = "login") {
+
+        composable("login") {
+            LoginScreen(
+                viewModel = authViewModel,
+                onLoginSuccess = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate("register")
+                }
+            )
+        }
+
+        composable("register") {
+            RegisterScreen(
+                viewModel = authViewModel,
+                onRegisterSuccess = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable("home") {
             MainScreen(
                 homeViewModel,
@@ -33,6 +63,5 @@ fun NavGraph(homeViewModel: HomeViewModel, detailPokemonViewModel: DetailPokemon
             val pokemonId = backStackEntry.arguments?.getInt("pokemonId")
             DetailPokemonScreen(pokemonId ?: 0, detailPokemonViewModel)
         }
-
     }
 }

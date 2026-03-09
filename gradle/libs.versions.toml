@@ -21,6 +21,7 @@ coroutinesAndroid = '1.7.3'
 lifecycle = '2.2.0'
 chucker = '4.0.0'
 pagingVersion = "3.3.6"
+couchbaseLite = "3.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -60,6 +61,8 @@ coroutines-android = { group = "org.jetbrains.kotlinx", name ="kotlinx-coroutine
 
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "pagingVersion"}
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingVersion"}
+
+couchbase-lite = { group = "com.couchbase.lite", name = "couchbase-lite-android-ktx", version.ref = "couchbaseLite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
