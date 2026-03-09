@@ -11,4 +11,6 @@ interface Repository {
     suspend fun getPokemonDetail(id: Int): PokemonDetailModel
     fun registerUser(user: UserModel, password: String): Flow<Result<Unit>>
     fun loginUser(username: String, password: String): Flow<Result<UserModel>>
+    fun getLoggedInUser(): UserModel?
+    fun logout()
 }

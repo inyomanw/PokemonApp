@@ -3,6 +3,7 @@ package com.inyomanw.pokemonapp.data
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.inyomanw.pokemonapp.data.local.SessionManager
 import com.inyomanw.pokemonapp.data.local.UserLocalDataSource
 import com.inyomanw.pokemonapp.data.local.model.UserDocument
 import com.inyomanw.pokemonapp.data.mapper.toPokemonDetailModel
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 class RepositoryImplementation @Inject constructor(
     private val apiService: ApiService,
-    private val userLocalDataSource: UserLocalDataSource
+    private val userLocalDataSource: UserLocalDataSource,
+    private val sessionManager: SessionManager
 ) : Repository {
 
     override fun getListPokemon(): Flow<PagingData<PokemonModel>> {
@@ -66,11 +68,27 @@ class RepositoryImplementation @Inject constructor(
             emit(Result.failure(Exception("Password salah")))
             return@flow
         }
-        emit(Result.success(UserModel(
+        val user = UserModel(
             username = userDoc.username,
             fullName = userDoc.fullName,
             address = userDoc.address
-        )))
+        )
+        sessionManager.saveSession(username)
+        emit(Result.success(user))
+    }
+
+    override fun getLoggedInUser(): UserModel? {
+        val username = sessionManager.getLoggedInUsername() ?: return null
+        val doc = userLocalDataSource.findByUsername(username) ?: return null
+        return UserModel(
+            username = doc.username,
+            fullName = doc.fullName,
+            address = doc.address
+        )
+    }
+
+    override fun logout() {
+        sessionManager.clearSession()
     }
 
     private fun hashPassword(password: String): String {

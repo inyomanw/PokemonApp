@@ -35,17 +35,22 @@ import androidx.navigation.compose.rememberNavController
 import com.inyomanw.pokemonapp.presentation.ui.home.HomeScreen
 import com.inyomanw.pokemonapp.presentation.ui.home.HomeViewModel
 import com.inyomanw.pokemonapp.presentation.ui.profile.ProfileScreen
+import com.inyomanw.pokemonapp.presentation.ui.profile.ProfileViewModel
 
 @Composable
-fun MainScreen(homeViewModel: HomeViewModel, onItemClick: (Int) -> Unit) {
+fun MainScreen(
+    homeViewModel: HomeViewModel,
+    profileViewModel: ProfileViewModel,
+    onItemClick: (Int) -> Unit,
+    onLogout: () -> Unit
+) {
     val navController = rememberNavController()
     val navigationItems = listOf(
         NavigationItem.Home,
         NavigationItem.Profile,
     )
 
-    Scaffold(
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -60,7 +65,10 @@ fun MainScreen(homeViewModel: HomeViewModel, onItemClick: (Int) -> Unit) {
                     HomeScreen(homeViewModel, onItemClick)
                 }
                 composable(NavigationItem.Profile.route) {
-                    ProfileScreen()
+                    ProfileScreen(
+                        viewModel = profileViewModel,
+                        onLogout = onLogout
+                    )
                 }
             }
 
@@ -101,7 +109,6 @@ fun MainScreen(homeViewModel: HomeViewModel, onItemClick: (Int) -> Unit) {
                             )
                             .padding(horizontal = 16.dp, vertical = 4.dp)
                     ) {
-
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.title,
@@ -117,7 +124,6 @@ fun MainScreen(homeViewModel: HomeViewModel, onItemClick: (Int) -> Unit) {
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                         )
-
                     }
                 }
             }

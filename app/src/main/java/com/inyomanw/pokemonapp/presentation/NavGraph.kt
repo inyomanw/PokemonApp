@@ -13,16 +13,20 @@ import com.inyomanw.pokemonapp.presentation.ui.auth.RegisterScreen
 import com.inyomanw.pokemonapp.presentation.ui.detail.DetailPokemonScreen
 import com.inyomanw.pokemonapp.presentation.ui.detail.DetailPokemonViewModel
 import com.inyomanw.pokemonapp.presentation.ui.home.HomeViewModel
+import com.inyomanw.pokemonapp.presentation.ui.profile.ProfileViewModel
 
 @Composable
 fun NavGraph(
     homeViewModel: HomeViewModel,
     detailPokemonViewModel: DetailPokemonViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel,
+    isLoggedIn: Boolean
 ) {
     val navController = rememberNavController()
+    val startDestination = if (isLoggedIn) "home" else "login"
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = startDestination) {
 
         composable("login") {
             LoginScreen(
@@ -49,9 +53,15 @@ fun NavGraph(
 
         composable("home") {
             MainScreen(
-                homeViewModel,
+                homeViewModel = homeViewModel,
+                profileViewModel = profileViewModel,
                 onItemClick = { pokemonId ->
                     navController.navigate("detail/$pokemonId")
+                },
+                onLogout = {
+                    navController.navigate("login") {
+                        popUpTo("home") { inclusive = true }
+                    }
                 }
             )
         }
